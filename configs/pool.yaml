@@ -1,0 +1,17 @@
+"Configs":
+  "grpc-test":
+    "Address":
+      - "127.0.0.1:7001"
+      - "127.0.0.1:7007"
+    "MaxConcurrentStreams": 10
+    "MaxActive": 10
+    "MaxIdle": 1
+    "Reuse": true
+  "grpc-test2":
+    "Address":
+      - "127.0.0.1:7001"
+      - "127.0.0.1:7007"
+    "MaxConcurrentStreams": 10
+    "MaxActive": 10
+    "MaxIdle": 1
+    "Reuse": true

@@ -1,0 +1,48 @@
+# 综合配置
+base:
+  # 形式 支持 local nacos，如果本地则直接读取本地文件，固定5分钟更新内存；如果是nacos，根据配置读取更新本地文件
+  mode: "local"
+  # 格式 支持  json yaml
+  format: "json"
+  # config 路径目录 默认 ./configs 因k8s configmap设置为只读目录 k8s部署改为其他目录
+  configs_path: "./configs"
+
+# 配置中心
+nacos:
+  # nacos 地址
+  addr: "127.0.0.1"
+  # nacos 端口
+  port: 8848
+  # 命名空间
+  namespace_id: "dev"
+  # 组名称
+  group: "DEFAULT_GROUP"
+  # 命名空间
+  data_id: [ "app","cache","code","db","es","mongo_cluster","mysql_cluster","pool","tracer" ]
+  # 超时时间 毫秒
+  timeout_ms: 5000
+  # the username for nacos auth
+  username: ""
+  # the password for nacos auth
+  password: ""
+  # 日志等级 debug,info,warn,error
+  log_level: "info"
+  # 周期更新时间 秒
+  interval: 60
+
+# 日志配置
+log:
+  # 名称 格式 xxx_app xxx_script
+  name: "appcode_app"
+  # 路径 /data/logs/xxx_app.log
+  path: "./appcode_app.log"
+  # 是否debug
+  debug: true
+  # 日志大小 m
+  max_size: 50
+  # 日志存在时间 天
+  max_age: 10
+  # 日志最多保存几个
+  max_backups: 2
+  # 是否压缩
+  compress: false

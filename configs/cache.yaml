@@ -1,0 +1,50 @@
+"Redis":
+  "Address":
+    - "127.0.0.1:6500"
+    - "127.0.0.1:6501"
+    - "127.0.0.1:6502"
+    - "127.0.0.1:6503"
+    - "127.0.0.1:6504"
+    - "127.0.0.1:6505"
+    - "127.0.0.1:6506"
+  "Bid": "redis_pre"
+  "Prefix": "redis_pre"
+  "Cluster": true
+  "Expire": 604800
+  "ConnectTimeout": 10000
+  "ReadTimeout": 10000
+  "WriteTimeout": 10000
+  "PoolMaxActive": 100
+  "PoolMinActive": 10
+  "PoolIdleTimeout": 180000
+  "Password": "123456"
+
+"RedisP":
+  "Address":
+    - "127.0.0.1:63791"
+  "Bid": "redis_pre"
+  "Prefix": "redis_pre:p"
+  "Cluster": false
+  "Expire": 604800
+  "ConnectTimeout": 10000
+  "ReadTimeout": 10000
+  "WriteTimeout": 10000
+  "PoolMaxActive": 100
+  "PoolMinActive": 10
+  "PoolIdleTimeout": 180000
+  "Password": ""
+
+"Dynamic":
+  "DynamicAddress": "http://xxx/redisServerHttpProxy/obtainRedisProxy"
+  "IsDynamic": false
+  "CycleTime": 300
+  "CycleFlagTime": 1
+
+"NoProxy":
+  "ServiceAddress": "http://xxx:9090/redisVaild/redisVaildBid.do"
+  "MonitorAddress": "http://xxx:9090/redisHeart/sendHeart.do"
+  "AppCode": "appcode"
+  "Iv": "c558Gq0YQK2QUlMc"
+  "Lang": "golang"
+  "IsNoProxy": false
+  "MonitorTime": 2

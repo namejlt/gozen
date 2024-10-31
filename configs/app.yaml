@@ -1,0 +1,16 @@
+"Configs":
+  "Env": "dev"
+  "UrlMqServer": "ip"
+  "AppSecretKey": "std::string"
+  "AppAccessLimitTime": "0"
+  "sliceStr": "0,2,3,4"
+  "sliceInt": "0,2,3,4"
+  "sliceInt64": "0,2,3,4"
+  "sliceBool": "true,false,true,false"
+  "sliceFloat64": "0.2,3.4"
+  "sliceFloat32": "0.2,3.4"
+  "test": "这里是测试的值999"
+  "num001": 999
+  "arr001": [ 1,2,3,4,5 ]
+  "arr002": [ "1h","2g","3f","4d","5s" ]
+  "SignSwitch": "0"

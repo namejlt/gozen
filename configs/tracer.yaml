@@ -1,0 +1,9 @@
+"Tracer":
+  "ServiceName": "xxx"
+  "Disabled": false
+  "Sampler":
+    "SamplingRate": 0.2
+  "Reporter":
+    "LogSpans": true
+    "BufferFlushInterval": 1
+    "LocalAgentHostPort": "127.0.0.1:11800"

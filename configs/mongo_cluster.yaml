@@ -1,0 +1,30 @@
+- "DbNum": 2001
+  "DbName": "dbname"
+  "Servers": "127.0.0.1:27017"
+  "ReadOption": "primary"
+  "Options": "authSource=admin"
+  "User": "mongoadmin"
+  "Password": "mongopassword"
+  "Timeout": 60
+  "MaxPoolSize": 100
+  "MinPoolSize": 10
+  "SocketTimeout": 30
+  "ConnectTimeout": 30
+  "MaxConnIdleTime": 600
+  "ServerSelectionTimeout": 30
+
+- "DbNum": 2002
+  "DbName": "dbname"
+  "Servers": "127.0.0.1:27017"
+  "ReadOption": "primary"
+  "Options": "authSource=admin"
+  "User": "mongoadmin"
+  "Password": "mongopassword"
+  "Timeout": 60
+  "MaxPoolSize": 100
+  "MinPoolSize": 10
+  "SocketTimeout": 30
+  "ConnectTimeout": 30
+  "MaxConnIdleTime": 600
+  "ServerSelectionTimeout": 30
+

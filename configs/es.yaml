@@ -1,0 +1,9 @@
+"Address":
+  - "ip"
+"Timeout": 3000
+"HealthcheckTimeout": 1
+"HealthcheckInterval": 60
+"HealthcheckEnabled": true
+"SnifferEnabled": true
+"TransportMaxIdel": 10
+
