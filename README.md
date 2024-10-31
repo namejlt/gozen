@@ -1,5 +1,15 @@
 # gozen
 
+#### 特性
+
+~~~~
+快速创建项目
+封装支持常用中间件:mysql、redis、mongodb、es
+分层运行:http、grpc、script
+链路跟踪使用skywalking
+
+~~~~
+
 #### 模块
 
 ~~~~
@@ -43,23 +53,4 @@ redis cluster
 
 ~~~~
 
-#### finish
-
-~~~~
-
-20210706 GRPC pool
-20210706 GRPC tracer ID 传输
-20220919 redis 支持 主从、cluster
-
-~~~~
-
-#### TODO
-
-~~~~
-
-服务配置走注册发现
-服务发现降级
-go.mongodb.org/mongo-driver v1.10.3 无法升级，需要mongodb服务先行升级
-
-~~~~
 
