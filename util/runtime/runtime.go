@@ -18,11 +18,11 @@ package runtime
 
 import (
 	"fmt"
+	"log"
 	"runtime"
+	"runtime/debug"
 	"sync"
 	"time"
-
-	"github.com/namejlt/gozen"
 )
 
 var (
@@ -33,7 +33,7 @@ var (
 )
 
 // PanicHandlers is a list of functions which will be invoked when a panic happens.
-var PanicHandlers = []func(interface{}){logPanic}
+var PanicHandlers = []func(any){logPanic}
 
 // HandleCrash simply catches a crash and logs an error. Meant to be called via
 // defer.  Additional context-specific handlers can be provided, and will be
@@ -45,7 +45,7 @@ var PanicHandlers = []func(interface{}){logPanic}
 // of the Kubernetes project, nothing was going to restart apiserver and so
 // catching panics was important. But it's actually much simpler for monitoring
 // software if we just exit when an unexpected panic happens.
-func HandleCrash(additionalHandlers ...func(interface{})) {
+func HandleCrash(additionalHandlers ...func(any)) {
 	if r := recover(); r != nil {
 		for _, fn := range PanicHandlers {
 			fn(r)
@@ -61,12 +61,11 @@ func HandleCrash(additionalHandlers ...func(interface{})) {
 }
 
 // logPanic logs the caller tree when a panic occurs.
-func logPanic(r interface{}) {
-	callers := getCallers(r)
-	gozen.UtilLogErrorf("Observed a panic: %#v (%v)\n%v", r, r, callers)
+func logPanic(r any) {
+	log.Printf("Observed a panic: %#v (%v)\n%s", r, r, debug.Stack())
 }
 
-func getCallers(r interface{}) string {
+func getCallers(r any) string {
 	callers := ""
 	for i := 0; true; i++ {
 		_, file, line, ok := runtime.Caller(i)
@@ -111,7 +110,7 @@ func HandleError(err error) {
 
 // logError prints an error with the call stack of the location it was reported
 func logError(err error) {
-	gozen.UtilLogError(err.Error())
+	log.Printf("ERROR: %v", err.Error())
 }
 
 type rudimentaryErrorBackoff struct {

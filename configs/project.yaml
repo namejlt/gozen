@@ -3,7 +3,7 @@ base:
   # 形式 支持 local nacos，如果本地则直接读取本地文件，固定5分钟更新内存；如果是nacos，根据配置读取更新本地文件
   mode: "local"
   # 格式 支持  json yaml
-  format: "json"
+  format: "yaml"
   # config 路径目录 默认 ./configs 因k8s configmap设置为只读目录 k8s部署改为其他目录
   configs_path: "./configs"
 

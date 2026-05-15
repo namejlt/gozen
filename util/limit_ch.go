@@ -2,7 +2,6 @@ package util
 
 import (
 	"context"
-	"github.com/namejlt/gozen"
 	"time"
 )
 
@@ -23,10 +22,19 @@ func NewLimitCh(limitNum int, ticker time.Duration) (p *LimitCh) {
 	return
 }
 
+func goFuncOne(f func() error) {
+	defer func() {
+		if r := recover(); r != nil {
+			// panic recovered, silently ignore
+		}
+	}()
+	_ = f()
+}
+
 func (p *LimitCh) Start() {
 	p.initData()
 	t := time.NewTicker(p.ticker)
-	go gozen.GoFuncOne(func() error {
+	go goFuncOne(func() error {
 		for {
 			select {
 			case <-p.ctx.Done():

@@ -1,76 +1,136 @@
-### 模板系统
+# Project Structure Guide
 
-main 入口文件，初始化服务启动
-
-server 存放服务启动文件，包含http服务、grpc服务、tcp等其他服务
-
-route 存放所有路由，按照app、api、iapi、admin划分
-
-controller 控制器，仅处理参数获取与响应返回
-
-service 包含所有核心逻辑，base_logic基础逻辑，logic直接供controller调用
-
-model 存放所有db映射模型、缓存映射模型、参数模型、响应数据模型等
+## Recommended Layout for a Gozen-based Project
 
 ```
-mparam - 入参
-mbase - 非业务逻辑固定数据结构
-mtransfer - 业务中间数据结构
-mmysql - mysql业务结构 - 这里务必要保证注释准确 gorm严格限制
-mmongo - mongo业务结构
-mapi - 出参
-mredis - redis业务结构
-mmq - mq业务结构
-apim - 调用第三方接口数据结构
-
-m1234 - m开头的业务结构数据
-
+my-service/
+├── main.go                     — Entry point: bootstrap + lifecycle.Run()
+├── Dockerfile                  — Container build
+├── Makefile                    — Build / test / lint targets
+├── .golangci.yml               — Linter config
+│
+├── configs/                    — Application config files (YAML)
+│   ├── app.yaml
+│   └── db.yaml
+│
+├── internal/                   — Private application code
+│   ├── model/                  — Domain types (entities, DTOs, request/response)
+│   ├── repository/             — Data access layer (database queries)
+│   ├── service/                — Business logic layer
+│   └── handler/                — HTTP / gRPC handlers (parameter binding)
+│
+├── migrations/                 — Database migrations
+├── proto/                      — Protobuf definitions (optional)
+├── scripts/                    — Build / deploy scripts
+└── tests/                      — Integration tests
 ```
 
-dao 包含ao、api、grpc、mongo、mysql、redis、es等所有数据io的操作
+## Standard Layer Responsibilities
 
-script 脚本分为script和daemon两种
+### model/ — Domain Model
 
-proto 存放proto定义文件
+```go
+// User represents the core user entity.
+type User struct {
+    ID        int64     `json:"id" gorm:"primaryKey"`
+    Username  string    `json:"username" gorm:"uniqueIndex"`
+    Email     string    `json:"email"`
+    CreatedAt time.Time `json:"created_at"`
+    UpdatedAt time.Time `json:"updated_at"`
+}
 
-grpc 存放pb.go文件和grpc服务实例化文件
+// CreateUserRequest — API input.
+type CreateUserRequest struct {
+    Username string `json:"username" binding:"required,min=3"`
+    Email    string `json:"email"    binding:"required,email"`
+}
 
-middleware 中间件，gin中间件供http服务使用
+// UserResponse — API output.
+type UserResponse struct {
+    ID       int64  `json:"id"`
+    Username string `json:"username"`
+    Email    string `json:"email"`
+}
+```
 
-pconst 常量目录 变量目录
+### repository/ — Data Access
 
-test 存放单元测试
+Uses gozen `database/*` interfaces:
 
-util 工具函数目录
+```go
+type UserRepository struct {
+    db    mysql.Connector
+    cache redis.Connector
+}
 
-#### tracer
+func NewUserRepository(db mysql.Connector, cache redis.Connector) *UserRepository {
+    return &UserRepository{db: db, cache: cache}
+}
 
-skywalking
+func (r *UserRepository) GetByID(ctx context.Context, id int64) (*User, error) {
+    gdb, _ := r.db.Read(ctx)
+    var u User
+    if err := gdb.First(&u, id).Error; err != nil {
+        return nil, err
+    }
+    return &u, nil
+}
+```
 
-http://127.0.0.1:8080/
+### service/ — Business Logic
 
-## swagger
+```go
+type UserService struct {
+    repo *UserRepository
+    bus  event.Bus
+}
 
-自动生成接口文档
+func (s *UserService) Create(ctx context.Context, req *CreateUserRequest) (*UserResponse, error) {
+    u := &User{Username: req.Username, Email: req.Email}
+    if err := s.repo.Create(ctx, u); err != nil {
+        log.L().Errorw("create user failed", "error", err)
+        return nil, errors.New("create failed")
+    }
+    // Publish async event
+    s.bus.Publish("user.created", u.ID)
+    return NewUserResponse(u), nil
+}
+```
 
-1. 按照swagger要求给接口代码添加声明式注释，具体参照声明式注释格式。
-2. 使用swag工具扫描代码自动生成API接口文档数据
-3. 使用gin-swagger渲染在线接口文档页面
+### handler/ — HTTP Handlers
 
-## 项目启动操作
+```go
+type UserHandler struct {
+    svc *UserService
+}
 
-配置golang环境
+func (h *UserHandler) Create(c *gin.Context) {
+    var req CreateUserRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(400, util.NewError(1004, err.Error()))
+        return
+    }
+    resp, err := h.svc.Create(c.Request.Context(), &req)
+    if err != nil {
+        c.JSON(500, util.NewError(1010, err.Error()))
+        return
+    }
+    c.JSON(201, util.NewSuccess(resp))
+}
+```
 
-设置go环境变量
+## Migration from Legacy Structure
 
-GOPROXY=https://goproxy.cn,direct;GOSUMDB=off
+If you were using the old gozen structure (v1.x with dao/ / route/ / controller/ /
+service/ / model/ directories in the project root):
 
-go install github.com/swaggo/swag/cmd/swag@latest
-
-go mod tidy
-
-make docs
-
-make build
-
-make run
+| Old Path | New Path | Notes |
+|----------|----------|-------|
+| `controller/` | `internal/handler/` | Parameter binding + response |
+| `service/*_logic.go` | `internal/service/` | Business logic |
+| `dao/` | `internal/repository/` | Data access |
+| `model/` | `internal/model/` | Domain types |
+| `route/` | `server.go` or handler methods | Route registration in main |
+| `pconst/` | `internal/model/` or dedicated | Constants |
+| `middleware/` | `transport/http/middleware/` | Use framework middleware |
+| `util/` | `util/` or `internal/` | Shared helpers |

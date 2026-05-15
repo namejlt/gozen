@@ -1,58 +1,79 @@
-# gozen
+# Gozen
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/namejlt/gozen)
+**Go通用业务开发底层基座框架** — Interface-driven, production-grade Go SDK for microservices.
 
-#### 特性
+[![Go Reference](https://pkg.go.dev/badge/github.com/namejlt/gozen)](https://pkg.go.dev/github.com/namejlt/gozen)
+[![Go Report Card](https://goreportcard.com/badge/github.com/namejlt/gozen)](https://goreportcard.com/report/github.com/namejlt/gozen)
 
-~~~~
-快速创建项目
-封装支持常用中间件:mysql、redis、mongodb、es
-分层运行:http、grpc、script
-链路跟踪使用skywalking
+## Features
 
-~~~~
+- **Pluggable Configuration** — File, Nacos, or custom sources via `config.Source` interface
+- **Structured Logging** — `log.Logger` interface with Zap(lumberjack) default
+- **Distributed Tracing** — `trace.Tracer` interface with Apache SkyWalking implementation
+- **Database Abstractions** — `database/mysql`, `database/redis`, `database/mongodb`, `database/elasticsearch`
+- **HTTP Transport** — Gin-based server with middleware (Recovery, RequestID, AccessLog, CORS)
+- **gRPC Transport** — Server + connection pool with round-robin load balancing
+- **Event Bus** — In-process pub/sub with async dispatch
+- **Unified Errors** — `errors.Error` interface with code registry + hot-reload
+- **Lifecycle Management** — Graceful startup/shutdown with signal handling
+- **Health Checks** — `/health`, `/health/ready`, `/health/live` endpoints
+- **Prometheus Metrics** — Request count, duration, and in-flight gauges
+- **Concurrency Primitives** — Semaphore-based concurrency limiter
 
-#### 模块
+## Quick Start
 
-~~~~
-config:配置
-util:工具
-dao:数据访问
-model:数据模型
-gin配置路由
+```go
+package main
 
-~~~~
+import (
+    "context"
+    "time"
 
-#### 生命周期说明
+    "github.com/namejlt/gozen/config"
+    "github.com/namejlt/gozen/log"
+    "github.com/namejlt/gozen/lifecycle"
+    httptransport "github.com/namejlt/gozen/transport/http"
+)
 
-~~~~
+func main() {
+    // Config
+    mgr := config.NewManager()
+    mgr.AddSource(config.NewFileSource("./configs"))
+    var appCfg config.AppConfig
+    mgr.Load("app", &appCfg)
 
-启动
+    // Logger
+    zl, _ := log.NewZapLogger(log.Config{Name: "my-service", Debug: true})
+    log.SetLogger(zl)
 
-0、扫描配置检测格式并配置写进内存
-1、针对配置进行初始化操作：db连接池、grpc连接池、cache连接池或其他服务检测可用性
-2、启动http或grpc服务
+    // HTTP Server
+    srv := httptransport.NewServer(httptransport.WithAddr(":8080"))
+    srv.Router().GET("/ping", func(c *gin.Context) {
+        c.JSON(200, gin.H{"message": "pong"})
+    })
 
-关闭
-0、信号通知进程关闭，进入关闭流程http、grpc走shutdown流程
-1、shutdown中针对配置之前初始化的服务进行主动close操作
+    // Run
+    app := lifecycle.New("my-service")
+    app.AddServer(srv)
+    if err := app.Run(); err != nil {
+        log.L().Fatalw("exited", "error", err)
+    }
+}
+```
 
-~~~~
+## Full Example
 
-#### redis
+See [examples/user-service](./examples/user-service) for a complete web business
+project with MySQL, Redis, event bus, and layered architecture.
 
-~~~~
+## Documentation
 
-封装 github.com/go-redis/redis
+- [Architecture Guide](./docs/readme.md)
+- [Configuration Guide](./docs/config.md)
+- [Project Structure Guide](./docs/project.md)
+- [Debug Variables](./docs/debug_vars.md)
+- [Swagger Guide](./docs/swaggo.md)
 
-redis 主从
-配置多个主节点，
+## License
 
-redis cluster
-
-包含侵入非通用redis地址获取代码
-
-
-~~~~
-
-
+MIT

@@ -1,0 +1,4 @@
+# User service configuration
+env: dev
+host: ":8080"
+docs: swagger
